@@ -64,3 +64,32 @@ class CounterpartyRiskEngine:
         cva = (1 - recovery_rate) * np.sum(ee * marginal_pd)
         
         return float(cva)
+
+    def calculate_cva_wwr(self, recovery_rate: float, pd_curve: np.ndarray, alpha_wwr: float = 1.1) -> float:
+        """
+        Calculate CVA with Wrong-Way Risk (WWR) multiplier.
+        alpha_wwr: Basel multiplier (usually 1.0 to 1.4) to account for correlation between EE and PD.
+        """
+        base_cva = self.calculate_cva(recovery_rate, pd_curve)
+        return base_cva * alpha_wwr
+
+class RatingMigrationEngine:
+    def __init__(self, transition_matrix: np.ndarray):
+        """
+        transition_matrix: (N, N) matrix where cell (i, j) is prob of moving from rating i to j.
+        """
+        self.tm = transition_matrix
+        if not np.allclose(transition_matrix.sum(axis=1), 1.0):
+            raise ValueError("Rows of transition matrix must sum to 1.0")
+
+    def simulate_migration(self, initial_rating_idx: int, horizons: int) -> np.ndarray:
+        """
+        Simulate a rating path over H discrete time steps.
+        """
+        current_rating = initial_rating_idx
+        path = [current_rating]
+        for _ in range(horizons):
+            probs = self.tm[current_rating]
+            current_rating = np.random.choice(len(probs), p=probs)
+            path.append(current_rating)
+        return np.array(path)
