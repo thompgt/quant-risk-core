@@ -1,0 +1,8 @@
+numpy
+scipy
+pandas
+matplotlib
+arch
+statsmodels
+numba
+pytest
