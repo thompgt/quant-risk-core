@@ -11,3 +11,4 @@ ipykernel
 nbformat
 nbconvert
 ipywidgets
+yfinance
