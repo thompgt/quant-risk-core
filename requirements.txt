@@ -6,3 +6,8 @@ arch
 statsmodels
 numba
 pytest
+plotly
+ipykernel
+nbformat
+nbconvert
+ipywidgets
