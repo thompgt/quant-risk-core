@@ -21,8 +21,8 @@ class DataPreprocessor:
         # Calculate log returns
         log_returns = np.log(prices / prices.shift(1))
         
-        # Drop the first row which will be NaN
-        log_returns = log_returns.dropna(how='all')
+        # Drop any row that has at least one NaN across assets to ensure consistent time alignment
+        log_returns = log_returns.dropna()
         
         if self.drop_zero_variance:
             # Check for columns with zero variance
