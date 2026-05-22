@@ -12,3 +12,4 @@ nbformat
 nbconvert
 ipywidgets
 yfinance
+websocket-client
