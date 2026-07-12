@@ -1,7 +1,5 @@
 import numpy as np
-import pandas as pd
-from typing import List, Dict, Optional
-from numba import njit, prange
+from typing import Dict
 
 class CounterpartyRiskEngine:
     def __init__(self, time_grid: np.ndarray):
