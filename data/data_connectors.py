@@ -39,7 +39,7 @@ class YahooFinanceConnector:
                 asset = yf.Ticker(ticker)
                 # Prefer fast_info when available
                 fast = getattr(asset, "fast_info", None)
-                if isinstance(fast, dict) and fast.get("last_price") is not None:
+                if fast is not None and fast.get("last_price") is not None:
                     return float(fast["last_price"])
 
                 # Fallback to minute history and take the last close
