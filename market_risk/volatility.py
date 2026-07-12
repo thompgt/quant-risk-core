@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from typing import Optional, Tuple, Dict, Any
 from arch import arch_model
+import statsmodels.api as sm
 import warnings
 
 class GARCHEngine:
@@ -19,6 +20,7 @@ class GARCHEngine:
         self.omega = 0.0
         self.alpha = 0.0
         self.beta = 0.0
+        self.gamma = 0.0 # Leverage effect (EGARCH only)
         self.nu = None # Degrees of freedom for t dist
 
     def fit(self, returns: pd.Series, model_type: str = 'Garch') -> None:
@@ -68,7 +70,6 @@ class GARCHEngine:
             raise ValueError("Model must be fitted first.")
         return self.model_fit.conditional_volatility
 
-import statsmodels.api as sm
 
 class RegimeSwitchingEngine:
     def __init__(self, k_regimes: int = 2):
