@@ -37,6 +37,8 @@ class WebSocketConnector:
         self._ws = None
         self._thread = None
         self._running = False
+        self._min_reconnect_delay = 1.0
+        self._max_reconnect_delay = 30.0
 
     def _run(self):
         def _on_message(wsapp, message):
@@ -53,9 +55,17 @@ class WebSocketConnector:
                 except Exception:
                     pass
 
+        def _on_close(wsapp, close_status_code, close_msg):
+            # clean server-side close; just let the reconnect loop take over
+            pass
+
+        delay = self._min_reconnect_delay
         while self._running:
+            connected_at = time.monotonic()
             try:
-                self._ws = websocket.WebSocketApp(self.url, on_message=_on_message, on_error=_on_error)
+                self._ws = websocket.WebSocketApp(
+                    self.url, on_message=_on_message, on_error=_on_error, on_close=_on_close
+                )
                 self._ws.run_forever()
             except Exception as e:
                 if self.on_error:
@@ -63,8 +73,16 @@ class WebSocketConnector:
                         self.on_error(e)
                     except Exception:
                         pass
-            # simple reconnect delay
-            time.sleep(1)
+
+            if not self._running:
+                break
+
+            # a connection that stayed up for a while was healthy; reset backoff
+            if time.monotonic() - connected_at >= self._max_reconnect_delay:
+                delay = self._min_reconnect_delay
+
+            time.sleep(delay)
+            delay = min(delay * 2, self._max_reconnect_delay)
 
     def start(self):
         if self._running:
