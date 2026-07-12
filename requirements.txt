@@ -14,4 +14,3 @@ ipywidgets
 yfinance
 websocket-client
 kaleido
-nbconvert
