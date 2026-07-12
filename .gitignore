@@ -3,3 +3,5 @@ __pycache__/
 .ipynb_checkpoints/
 .pytest_cache/
 *.log
+risk_analysis_visuals.executed.ipynb
+risk_analysis_visuals.executed.html
