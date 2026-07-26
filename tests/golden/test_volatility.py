@@ -21,7 +21,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from market_risk.volatility import (
+from quant_risk_core.market_risk.volatility import (
     GARCHEngine,
     GARCHNotConvergedError,
     RegimeSwitchingEngine,

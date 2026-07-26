@@ -21,7 +21,7 @@ import pandas as pd
 import pytest
 from scipy import integrate, stats
 
-from market_risk.extreme_value import EVTEngine
+from quant_risk_core.market_risk.extreme_value import EVTEngine
 
 
 def make_engine(xi, beta, u=0.02, pu=0.05, n_total=4000):

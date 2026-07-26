@@ -1,5 +1,5 @@
 import numpy as np
-from credit_risk.counterparty import CounterpartyRiskEngine, RatingMigrationEngine
+from quant_risk_core.credit_risk.counterparty import CounterpartyRiskEngine, RatingMigrationEngine
 
 def test_wwr_cva():
     time_grid = np.array([0.5, 1.0])

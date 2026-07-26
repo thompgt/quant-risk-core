@@ -1,6 +1,6 @@
 import numpy as np
-from credit_risk.counterparty import CounterpartyRiskEngine
-from credit_risk.mitigation import NettingEngine
+from quant_risk_core.credit_risk.counterparty import CounterpartyRiskEngine
+from quant_risk_core.credit_risk.mitigation import NettingEngine
 
 def test_counterparty_profiles():
     # Grid of 5 points

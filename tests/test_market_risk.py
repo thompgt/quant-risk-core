@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from market_risk.estimators import RiskEngine
-from market_risk.backtesting import RiskBacktester
-from market_risk.volatility import GARCHEngine
+from quant_risk_core.market_risk.estimators import RiskEngine
+from quant_risk_core.market_risk.backtesting import RiskBacktester
+from quant_risk_core.market_risk.volatility import GARCHEngine
 
 def test_var_estimators():
     # Setup dummy data

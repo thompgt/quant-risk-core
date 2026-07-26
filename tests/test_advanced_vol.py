@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from market_risk.volatility import GARCHEngine, RegimeSwitchingEngine
+from quant_risk_core.market_risk.volatility import GARCHEngine, RegimeSwitchingEngine
 
 def test_egarch():
     np.random.seed(42)

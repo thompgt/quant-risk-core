@@ -24,8 +24,8 @@ sum. Numeric expectations below are computed by hand in the test bodies.
 import numpy as np
 import pytest
 
-from credit_risk.counterparty import CounterpartyRiskEngine, RatingMigrationEngine
-from credit_risk.mitigation import CollateralManager, NettingEngine
+from quant_risk_core.credit_risk.counterparty import CounterpartyRiskEngine, RatingMigrationEngine
+from quant_risk_core.credit_risk.mitigation import CollateralManager, NettingEngine
 
 
 # --------------------------------------------------------------------------

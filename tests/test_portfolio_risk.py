@@ -1,5 +1,5 @@
 import numpy as np
-from portfolio_risk.decomposition import RiskDecomposer
+from quant_risk_core.portfolio_risk.decomposition import RiskDecomposer
 
 def test_risk_decomposition():
     weights = np.array([0.6, 0.4])
@@ -19,7 +19,7 @@ def test_risk_decomposition():
     np.testing.assert_approx_equal(np.sum(cvar), port_var, significant=4)
 
 def test_copula_samples():
-    from portfolio_risk.decomposition import CopulaEngine
+    from quant_risk_core.portfolio_risk.decomposition import CopulaEngine
     # Reusing the file for brevity in this step, normally separate
     corr = np.array([
         [1.0, 0.5],

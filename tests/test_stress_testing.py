@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from market_risk.stress_testing import ScenarioEngine, FactorStresser
+from quant_risk_core.market_risk.stress_testing import ScenarioEngine, FactorStresser
 
 def test_hypothetical_scenario():
     df = pd.DataFrame({'AAPL': [150, 155], 'GOOG': [2800, 2850]})

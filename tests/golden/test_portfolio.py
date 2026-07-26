@@ -16,8 +16,8 @@ Items these cover:
 import numpy as np
 import pytest
 
-from market_risk.estimators import RiskEngine
-from portfolio_risk.decomposition import CopulaEngine, RiskDecomposer
+from quant_risk_core.market_risk.estimators import RiskEngine
+from quant_risk_core.portfolio_risk.decomposition import CopulaEngine, RiskDecomposer
 
 
 def make_cov(n=4, seed=0):

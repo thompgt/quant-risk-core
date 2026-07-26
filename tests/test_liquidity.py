@@ -1,5 +1,5 @@
 import numpy as np
-from market_risk.liquidity import LiquidityRiskEngine
+from quant_risk_core.market_risk.liquidity import LiquidityRiskEngine
 
 def test_liquidity_adjustment():
     engine = LiquidityRiskEngine(position_size=1000, mid_price=100)

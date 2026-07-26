@@ -1,7 +1,7 @@
 """Generate the figures embedded in README.md.
 
 Every chart is produced by the repository's own engines running on real market
-data pulled through ``data.data_connectors.YahooFinanceConnector``.
+data pulled through ``quant_risk_core.data.data_connectors.YahooFinanceConnector``.
 
 Usage:
     python scripts/generate_readme_figures.py
@@ -23,17 +23,18 @@ import pandas as pd
 from scipy.stats import genpareto, norm
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+# Runs against the source tree even when the package is not pip-installed.
+sys.path.insert(0, str(ROOT / "src"))
 
-from credit_risk.counterparty import CounterpartyRiskEngine  # noqa: E402
-from credit_risk.mitigation import CollateralManager, NettingEngine  # noqa: E402
-from data.data_connectors import YahooFinanceConnector  # noqa: E402
-from market_risk.backtesting import RiskBacktester  # noqa: E402
-from market_risk.data_preprocessor import DataPreprocessor  # noqa: E402
-from market_risk.estimators import RiskEngine  # noqa: E402
-from market_risk.extreme_value import EVTEngine  # noqa: E402
-from market_risk.volatility import GARCHEngine  # noqa: E402
-from portfolio_risk.decomposition import RiskDecomposer  # noqa: E402
+from quant_risk_core.credit_risk.counterparty import CounterpartyRiskEngine  # noqa: E402
+from quant_risk_core.credit_risk.mitigation import CollateralManager, NettingEngine  # noqa: E402
+from quant_risk_core.data.data_connectors import YahooFinanceConnector  # noqa: E402
+from quant_risk_core.market_risk.backtesting import RiskBacktester  # noqa: E402
+from quant_risk_core.market_risk.data_preprocessor import DataPreprocessor  # noqa: E402
+from quant_risk_core.market_risk.estimators import RiskEngine  # noqa: E402
+from quant_risk_core.market_risk.extreme_value import EVTEngine  # noqa: E402
+from quant_risk_core.market_risk.volatility import GARCHEngine  # noqa: E402
+from quant_risk_core.portfolio_risk.decomposition import RiskDecomposer  # noqa: E402
 
 OUT_DIR = ROOT / "docs" / "images"
 

@@ -15,7 +15,7 @@ lognormal, so MC VaR must approach the analytic quantile as paths increase.
 import numpy as np
 import pytest
 
-from market_risk.estimators import RiskEngine, resolve_rng, simulate_paths
+from quant_risk_core.market_risk.estimators import RiskEngine, resolve_rng, simulate_paths
 
 S0, MU, SIGMA = 100.0, 0.0005, 0.02
 

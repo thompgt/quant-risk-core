@@ -20,7 +20,7 @@ return *reduces* the expected loss, so both must decrease as `mu` increases.
 import numpy as np
 import pytest
 
-from market_risk.estimators import RiskEngine
+from quant_risk_core.market_risk.estimators import RiskEngine
 
 SIGMA = 0.02
 

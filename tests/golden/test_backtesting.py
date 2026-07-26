@@ -24,7 +24,7 @@ import pandas as pd
 import pytest
 from scipy import stats
 
-from market_risk.backtesting import BASEL_WINDOW, RiskBacktester
+from quant_risk_core.market_risk.backtesting import BASEL_WINDOW, RiskBacktester
 
 # Basel Committee (1996) published zones: 250 observations, 99% VaR.
 BASEL_TABLE = {

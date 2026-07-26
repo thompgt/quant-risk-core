@@ -17,7 +17,7 @@ References:
 import numpy as np
 import pytest
 
-from market_risk.pricing import BlackScholesEngine as BS
+from quant_risk_core.market_risk.pricing import BlackScholesEngine as BS
 
 # Hull's worked example.
 HULL = dict(S=42.0, K=40.0, T=0.5, r=0.10, sigma=0.20)
