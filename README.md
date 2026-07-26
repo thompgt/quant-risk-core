@@ -89,9 +89,11 @@ flowchart TD
    for live last-price updates.
 2. **Prepare.** `market_risk.data_preprocessor.DataPreprocessor` forward-fills gaps, drops
    zero-variance columns, and converts prices to log returns.
-3. **Model.** `GARCHEngine` (GARCH/EGARCH, normal or Student-t via `arch`) produces conditional
-   and forecast volatility; `RegimeSwitchingEngine` fits a Markov-switching regression for regime
-   probabilities. `EVTEngine` fits a Generalized Pareto distribution to peaks over a threshold.
+3. **Model.** `GARCHEngine` (GARCH/EGARCH/GJR, normal or Student-t via `arch`) produces conditional
+   and forecast volatility. It checks optimiser convergence and exposes `converged`,
+   `convergence_flag` and `persistence`; a fit that fails to converge still returns plausible-looking
+   parameters, so construct with `strict=True` to make that an error rather than a warning.
+   `RegimeSwitchingEngine` fits a Markov-switching regression for regime probabilities. `EVTEngine` fits a Generalized Pareto distribution to peaks over a threshold.
    `BlackScholesEngine` prices options and Greeks for the instruments being risked.
 4. **Measure.** `RiskEngine` turns those inputs into VaR and Expected Shortfall three ways —
    parametric (normal / Student-t), historical simulation, and vectorised Monte Carlo GBM paths
