@@ -244,5 +244,9 @@ print(RiskBacktester(confidence_level=0.99).evaluate(returns, pd.Series(var, ind
 ## Testing
 
 ```bash
-python -m pytest -q      # 14 tests
+python -m pytest -q
 ```
+
+`tests/golden/` holds validation tests whose expected values come from sources independent of the
+implementation (numerical quadrature, published references), rather than from the library's own
+output. Each golden test cites its reference in the module docstring.

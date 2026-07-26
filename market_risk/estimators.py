@@ -25,25 +25,38 @@ class RiskEngine:
     def parametric_var_es(self, mu: float, sigma: float, dist: str = 'normal', df: Optional[float] = None) -> Dict[str, float]:
         """
         Parametric VaR and ES using Normal or Student-t distribution.
+
+        Both VaR and ES are returned as *positive loss* quantities, i.e. for a
+        return R with mean `mu` and standard deviation `sigma`, the loss is
+        L = -R and
+
+            VaR_a = -(mu + sigma * q_{1-a})
+            ES_a  = -mu + sigma * k_a
+
+        where q is the (1-a) quantile of the standardised distribution and k_a
+        is the corresponding standardised tail expectation. Note the mean term
+        enters ES with a *negative* sign, exactly as it does in VaR: a positive
+        expected return reduces the expected loss.
         """
         results = {}
         for alpha in self.confidence_levels:
             if dist == 'normal':
                 z = stats.norm.ppf(1 - alpha)
                 var = -(mu + sigma * z)
-                # ES for normal distribution
-                es = mu + sigma * (stats.norm.pdf(z) / (1 - alpha))
+                # Standardised normal tail expectation: phi(z) / (1 - alpha)
+                es = -mu + sigma * (stats.norm.pdf(z) / (1 - alpha))
             elif dist == 't':
                 if df is None or df <= 2:
                     raise ValueError("Degrees of freedom must be > 2 for ES.")
                 t_val = stats.t.ppf(1 - alpha, df)
                 var = -(mu + sigma * t_val * np.sqrt((df - 2) / df))
-                
-                # ES for student t
-                # scaling factor to standard t
+
+                # Standardised Student-t tail expectation. The sqrt((df-2)/df)
+                # factor rescales the raw t to unit variance so that `sigma` is
+                # interpreted as the standard deviation of the return.
                 scale_t = stats.t.pdf(t_val, df) / (1 - alpha)
                 adj = (df + t_val**2) / (df - 1)
-                es = mu + sigma * scale_t * adj * np.sqrt((df - 2) / df)
+                es = -mu + sigma * scale_t * adj * np.sqrt((df - 2) / df)
             else:
                 raise ValueError("Unsupported distribution.")
                 
