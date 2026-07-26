@@ -31,7 +31,16 @@ dependencies = [
 data = ["yfinance>=0.2.40,<0.3", "websocket-client>=1.7,<2"]
 viz = ["matplotlib>=3.8,<4", "plotly>=5.20,<7", "kaleido>=0.2.1,<2"]
 notebook = ["ipykernel>=6.29,<7", "nbformat>=5.10,<6", "nbconvert>=7.16,<8", "ipywidgets>=8.1,<9"]
-dev = ["pytest>=8.0,<9", "pytest-cov>=5.0", "hypothesis>=6.100", "ruff>=0.5", "mypy>=1.10"]
+dev = [
+    "pytest>=8.0,<10",
+    "pytest-cov>=5.0,<9",
+    "hypothesis>=6.100,<7",
+    # ruff is pre-1.0 and reserves the right to change rule behaviour on any
+    # minor; mypy 2.x tightened defaults. Both are pinned exactly in
+    # constraints.txt so a lint failure means the code changed, not the tool.
+    "ruff>=0.5,<1",
+    "mypy>=1.10,<3",
+]
 
 [project.scripts]
 quant-risk-validate = "quant_risk_core.cli:main"

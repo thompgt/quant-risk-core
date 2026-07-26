@@ -1,0 +1,88 @@
+# Fully-pinned constraints for reproducible installs.
+#
+# pyproject.toml declares floors and ceilings — the range the library is
+# *supported* on. This file pins one exact, known-good point inside that range,
+# so a CI run or a redeployed container resolves to the same versions the tests
+# were last verified against. A risk number that cannot be reproduced cannot be
+# validated, and that includes reproducing the stack that produced it.
+#
+# Used as a constraints file, not a requirements file:
+#
+#     pip install -e ".[dev]" -c constraints.txt
+#
+# Constraints only bound versions of packages that are actually being installed,
+# so this single file is safe across platforms and across extras — a Windows-only
+# or viz-only entry is simply ignored when it is not in the dependency closure.
+#
+# Regenerate by resolving the extras into a clean virtualenv and freezing it:
+#
+#     python -m venv /tmp/lock
+#     /tmp/lock/bin/pip install ".[data,viz,dev]"
+#     /tmp/lock/bin/pip freeze --exclude-editable
+#
+# Resolved on: Python 3.13, Windows. `notebook` extra deliberately excluded —
+# the jupyterlab widget extension exceeds the Windows MAX_PATH limit, and the
+# notebook is not part of any automated run.
+#
+arch==7.2.0
+ast_serialize==0.6.0
+beautifulsoup4==4.15.0
+certifi==2026.7.22
+cffi==2.1.0
+charset-normalizer==3.4.9
+choreographer==1.3.0
+colorama==0.4.6
+contourpy==1.3.3
+coverage==7.15.2
+curl_cffi==0.15.0
+cycler==0.12.1
+fonttools==4.63.0
+frozendict==2.4.7
+hypothesis==6.161.5
+idna==3.18
+iniconfig==2.3.0
+kaleido==1.3.0
+kiwisolver==1.5.0
+librt==0.13.0
+logistro==2.0.1
+markdown-it-py==4.2.0
+matplotlib==3.11.1
+mdurl==0.1.2
+multitasking==0.0.13
+mypy==2.3.0
+mypy_extensions==1.1.0
+narwhals==2.24.0
+numpy==2.5.1
+orjson==3.11.9
+packaging==26.2
+pandas==2.3.3
+pathspec==1.1.1
+patsy==1.0.2
+peewee==4.2.6
+pillow==12.3.0
+platformdirs==4.11.0
+plotly==6.9.0
+pluggy==1.6.0
+protobuf==7.35.1
+pycparser==3.0
+Pygments==2.20.0
+pyparsing==3.3.2
+pytest-cov==7.1.0
+pytest==8.4.2
+python-dateutil==2.9.0.post0
+pytz==2026.3.post1
+requests==2.34.2
+rich==15.0.0
+ruff==0.16.0
+scipy==1.18.0
+simplejson==4.1.1
+six==1.17.0
+sortedcontainers==2.4.0
+soupsieve==2.9.1
+statsmodels==0.14.6
+typing_extensions==4.16.0
+tzdata==2026.3
+urllib3==2.7.0
+websocket-client==1.9.0
+websockets==16.1.1
+yfinance==0.2.66

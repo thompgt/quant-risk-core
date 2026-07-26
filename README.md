@@ -190,8 +190,13 @@ capital does. The correlation matrix on the right is the dependence structure fe
 git clone https://github.com/thompgt/quant-risk-core.git
 cd quant-risk-core
 python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
-pip install -e ".[data,viz,notebook,dev]"
+pip install -e ".[data,viz,notebook,dev]" -c constraints.txt
 ```
+
+`pyproject.toml` declares the version *range* the library is supported on; `constraints.txt` pins
+one exact, known-good point inside it. Drop the `-c` flag to resolve freely, keep it to reproduce
+the stack the tests were last verified against — a risk number you cannot reproduce cannot be
+validated, and that includes the versions that produced it.
 
 Python 3.12+ required (developed on 3.13). The core install pulls only the analytics stack
 (numpy, scipy, pandas, arch, statsmodels); the extras are separable:
