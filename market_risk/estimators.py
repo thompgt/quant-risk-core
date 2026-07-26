@@ -69,8 +69,32 @@ def simulate_paths(
     diffusion = sigma * np.sqrt(dt) * z_sum
     return S0 * np.exp(drift + diffusion)
 
+DEFAULT_CONFIDENCE_LEVELS = (0.95, 0.99)
+
+
 class RiskEngine:
-    def __init__(self, confidence_levels: List[float] = [0.95, 0.99]):
+    def __init__(self, confidence_levels: Optional[List[float]] = None):
+        """
+        confidence_levels: levels at which VaR and ES are reported, each in (0, 1).
+
+        Defaults to (0.95, 0.99). The default was previously the mutable literal
+        `[0.95, 0.99]`, shared across every instance that did not pass one, so
+        mutating `engine.confidence_levels` in place changed the default for all
+        subsequently constructed engines.
+        """
+        if confidence_levels is None:
+            confidence_levels = list(DEFAULT_CONFIDENCE_LEVELS)
+        else:
+            confidence_levels = list(confidence_levels)
+
+        if not confidence_levels:
+            raise ValueError("confidence_levels must not be empty.")
+        for alpha in confidence_levels:
+            if not 0.0 < alpha < 1.0:
+                raise ValueError(
+                    f"confidence levels must lie in (0, 1); got {alpha}."
+                )
+
         self.confidence_levels = confidence_levels
 
     def parametric_var_es(self, mu: float, sigma: float, dist: str = 'normal', df: Optional[float] = None) -> Dict[str, float]:
@@ -119,7 +143,22 @@ class RiskEngine:
     def historical_var_es(self, returns: pd.Series) -> Dict[str, float]:
         """
         Historical Simulation for VaR and ES.
+
+        Limitations worth stating explicitly, since they are properties of the
+        method rather than of this implementation:
+
+        * The estimate cannot exceed the worst loss in the sample. At high
+          confidence levels on a short history it is bounded by a single
+          observation, which is why `EVTEngine` exists for the far tail.
+        * When no observation falls strictly beyond VaR, ES falls back to VaR.
+          That happens whenever `(1 - alpha) * n < 1`, i.e. the requested level
+          is finer than the sample can resolve; the reported ES is then a floor,
+          not an estimate of the tail mean.
         """
+        returns = pd.Series(returns).dropna()
+        if returns.empty:
+            raise ValueError("returns contains no observations.")
+
         results = {}
         for alpha in self.confidence_levels:
             var = -np.quantile(returns, 1 - alpha)
