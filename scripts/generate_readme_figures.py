@@ -247,8 +247,17 @@ def fig_evt(spy: pd.Series) -> None:
 def fig_credit_exposure(spy: pd.Series) -> None:
     rng = np.random.default_rng(1337)
     sigma_ann = float(spy.std()) * np.sqrt(252)  # vol calibrated on real SPY data
-    n_paths, n_steps, n_contracts = 20_000, 41, 3
-    grid = np.linspace(0.0, 5.0, n_steps)
+
+    # The grid step is chosen so a 10-business-day margin period of risk is
+    # representable as exactly one step (10/252 = 0.0397y). A coarser grid cannot
+    # express the MPOR at all: on the previous 41-point grid the step was 0.125y,
+    # so 10 days rounded to zero steps and the old inline `max(1, ...)` silently
+    # promoted it to one step, i.e. ~31 business days rather than 10.
+    mpor_days = 10
+    years, dt_years = 5.0, mpor_days / 252
+    n_steps = int(round(years / dt_years)) + 1
+    n_paths, n_contracts = 10_000, 3
+    grid = np.linspace(0.0, years, n_steps)
     dt = np.diff(grid, prepend=0.0)
 
     # Three swap-like contracts, driftless MtM diffusions calibrated to SPY vol
@@ -259,12 +268,11 @@ def fig_credit_exposure(spy: pd.Series) -> None:
     netted = NettingEngine(netting_enabled=True).aggregate_mtm(contract_values)
     gross = NettingEngine(netting_enabled=False).aggregate_mtm(contract_values)
 
-    cm = CollateralManager(threshold=25.0, mpor_days=10, mta=5.0)
-    lag = max(1, int(round(cm.mpor_days / 252 / (grid[1] - grid[0]))))
-    collateral = np.maximum(
-        np.concatenate([np.zeros((n_paths, lag)), netted[:, :-lag]], axis=1) - cm.threshold, 0.0
-    )
-    collateralised = cm.apply_collateral(netted, collateral)
+    # CollateralManager now applies the threshold, the minimum transfer amount
+    # and the MPOR lag itself; this used to be reimplemented inline here because
+    # those parameters were stored but unused.
+    cm = CollateralManager(threshold=25.0, mpor_days=mpor_days, mta=5.0)
+    collateralised = cm.apply_collateral(netted, time_grid=grid)
 
     eng_net = CounterpartyRiskEngine(grid)
     eng_net.set_portfolio_paths(netted)
@@ -278,12 +286,15 @@ def fig_credit_exposure(spy: pd.Series) -> None:
     eng_coll.set_portfolio_paths(collateralised)
     prof_coll = eng_coll.calculate_exposure_profiles(quantile=0.95)
 
-    hazard = 0.02
+    hazard, disc_rate = 0.02, 0.03
     pd_curve = 1 - np.exp(-hazard * grid)
-    cva_gross = eng_gross.calculate_cva(0.4, pd_curve)
-    cva_net = eng_net.calculate_cva(0.4, pd_curve)
-    cva_coll = eng_coll.calculate_cva(0.4, pd_curve)
-    cva_wwr = eng_net.calculate_cva_wwr(0.4, pd_curve, alpha_wwr=1.4)
+    # Discount the exposure. Omitting the curve leaves CVA undiscounted, which
+    # overstates it by roughly 8% on this five-year grid.
+    df = np.exp(-disc_rate * grid)
+    cva_gross = eng_gross.calculate_cva(0.4, pd_curve, df)
+    cva_net = eng_net.calculate_cva(0.4, pd_curve, df)
+    cva_coll = eng_coll.calculate_cva(0.4, pd_curve, df)
+    cva_wwr = eng_net.calculate_cva_wwr(0.4, pd_curve, alpha_wwr=1.4, discount_factors=df)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(11, 4.6))
 
@@ -305,7 +316,9 @@ def fig_credit_exposure(spy: pd.Series) -> None:
     bars = ax2.bar(names, vals, color=[MUTED, C1, C3, CRIT], width=0.62)
     ax2.bar_label(bars, fmt="%.2f", fontsize=9, color="#52514e", padding=2)
     ax2.set_ylabel("CVA")
-    ax2.set_title("CVA impact of risk mitigation (LGD 60%, 2% flat hazard)")
+    ax2.set_title(
+        "CVA impact of risk mitigation (LGD 60%, 2% hazard, 3% discount)"
+    )
     ax2.set_ylim(0, max(vals) * 1.2)
     ax2.grid(axis="x", visible=False)
 

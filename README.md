@@ -161,8 +161,12 @@ cannot see past its worst observed day.
 
 A three-trade netting set simulated over a five-year grid at SPY-calibrated volatility. Left:
 expected exposure, EPE, and 95% PFE with and without netting, plus the collateralised profile from
-`CollateralManager` (threshold, MTA, 10-day margin period of risk). Right: the resulting CVA under
-each mitigation regime, including the wrong-way-risk multiplier.
+`CollateralManager` (threshold, MTA, 10-day margin period of risk). The collateralised profile
+plateaus just above the threshold rather than falling to zero — that residual is the exposure the
+margin period of risk leaves uncovered. The grid step is set to 10 business days so the MPOR is
+representable as exactly one step; on a coarser grid it cannot be expressed at all. Right: the
+resulting CVA under each mitigation regime, discounted at 3%, including the wrong-way-risk
+multiplier.
 
 ### 5. Portfolio risk decomposition
 
