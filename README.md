@@ -94,8 +94,8 @@ flowchart TD
    probabilities. `EVTEngine` fits a Generalized Pareto distribution to peaks over a threshold.
    `BlackScholesEngine` prices options and Greeks for the instruments being risked.
 4. **Measure.** `RiskEngine` turns those inputs into VaR and Expected Shortfall three ways —
-   parametric (normal / Student-t), historical simulation, and Numba-accelerated Monte Carlo GBM
-   paths. `LiquidityRiskEngine` adds a bid-ask spread and market-impact overlay; `ScenarioEngine`
+   parametric (normal / Student-t), historical simulation, and vectorised Monte Carlo GBM paths
+   (explicitly seeded — every result reports the seed that reproduces it). `LiquidityRiskEngine` adds a bid-ask spread and market-impact overlay; `ScenarioEngine`
    and `FactorStresser` apply historical and hypothetical shocks.
 5. **Aggregate.** `portfolio_risk.decomposition.RiskDecomposer` splits portfolio VaR into marginal
    and component contributions; `CopulaEngine` generates Gaussian-copula dependent samples for

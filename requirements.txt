@@ -4,7 +4,6 @@ pandas
 matplotlib
 arch
 statsmodels
-numba
 pytest
 plotly
 ipykernel

@@ -1,22 +1,73 @@
 import numpy as np
 import pandas as pd
-from typing import Union, List, Optional, Dict
+from typing import Union, List, Optional, Dict, Tuple
 import scipy.stats as stats
-from numba import njit, prange
 
-@njit(parallel=True)
-def simulate_paths(S0: float, mu: float, sigma: float, horizon: int, paths: int, dt: float = 1.0) -> np.ndarray:
+SeedLike = Union[int, np.random.Generator, None]
+
+
+def resolve_rng(seed: SeedLike = None) -> Tuple[np.random.Generator, int]:
     """
-    Simulate geometric Brownian motion using Numba for Monte Carlo VaR.
+    Build a Generator and report the integer seed that reproduces it.
+
+    Risk numbers must be regenerable to be auditable, so callers that pass no
+    seed still get one drawn from OS entropy and returned to them, rather than
+    an unrecoverable global RNG state.
     """
-    results = np.zeros(paths)
-    for i in prange(paths):
-        Z = np.random.standard_normal(horizon)
-        S = S0
-        for t in range(horizon):
-            S = S * np.exp((mu - 0.5 * sigma**2) * dt + sigma * np.sqrt(dt) * Z[t])
-        results[i] = S
-    return results
+    if isinstance(seed, np.random.Generator):
+        # Caller owns the stream; there is no integer that reproduces its
+        # current position, so report -1 to mark the result as not replayable
+        # from a seed alone.
+        return seed, -1
+    if seed is None:
+        seed = int(np.random.SeedSequence().entropy % (2**63))
+    return np.random.default_rng(seed), int(seed)
+
+
+def simulate_paths(
+    S0: float,
+    mu: float,
+    sigma: float,
+    horizon: int,
+    paths: int,
+    dt: float = 1.0,
+    seed: SeedLike = None,
+) -> np.ndarray:
+    """
+    Simulate terminal values of a geometric Brownian motion.
+
+    Returns an array of `paths` terminal values S_T.
+
+    The terminal value of a GBM depends only on the *sum* of the horizon's
+    normal draws,
+
+        S_T = S0 * exp((mu - 0.5*sigma^2)*dt*H + sigma*sqrt(dt)*sum_t Z_t)
+
+    so a per-step loop is unnecessary for a terminal-only payoff and the whole
+    simulation reduces to one vectorised expression.
+
+    Reproducibility
+    ---------------
+    Draws come from an explicit `numpy.random.Generator` seeded by `seed`. An
+    earlier implementation of this function was `@njit(parallel=True)` and
+    called `np.random.standard_normal` inside a `prange` loop; Numba gives each
+    thread an independent RNG state that no Python-level seed can control, so
+    results were not reproducible run to run. Benchmarked on 50k paths at
+    H=10, that kernel was ~1.75x faster warm (8.4ms vs 14.6ms) but cost ~5.7s
+    of import plus ~6.5s of JIT compilation. Saving 6ms per call is not worth
+    forfeiting reproducibility, so the JIT was removed.
+    """
+    if horizon < 1:
+        raise ValueError("horizon must be a positive number of steps.")
+    if paths < 1:
+        raise ValueError("paths must be positive.")
+
+    rng, _ = resolve_rng(seed)
+    z_sum = rng.standard_normal((paths, horizon)).sum(axis=1)
+
+    drift = (mu - 0.5 * sigma**2) * dt * horizon
+    diffusion = sigma * np.sqrt(dt) * z_sum
+    return S0 * np.exp(drift + diffusion)
 
 class RiskEngine:
     def __init__(self, confidence_levels: List[float] = [0.95, 0.99]):
@@ -83,14 +134,33 @@ class RiskEngine:
             
         return results
 
-    def monte_carlo_var_es(self, initial_value: float, mu: float, sigma: float, horizon: int, paths: int = 50000) -> Dict[str, float]:
+    def monte_carlo_var_es(
+        self,
+        initial_value: float,
+        mu: float,
+        sigma: float,
+        horizon: int,
+        paths: int = 50000,
+        seed: SeedLike = None,
+    ) -> Dict[str, Union[int, float]]:
         """
         Monte Carlo Simulation for VaR and ES.
+
+        The returned dict carries the `seed` and `paths` actually used, so any
+        figure produced from it can be regenerated exactly. If `seed` is None a
+        seed is drawn from OS entropy and reported back; it is never left
+        implicit.
         """
-        terminal_values = simulate_paths(initial_value, mu, sigma, horizon, paths)
+        rng, resolved_seed = resolve_rng(seed)
+        terminal_values = simulate_paths(
+            initial_value, mu, sigma, horizon, paths, seed=rng
+        )
         returns = (terminal_values - initial_value) / initial_value
-        
-        results = {}
+
+        results: Dict[str, Union[int, float]] = {
+            'seed': resolved_seed,
+            'paths': int(paths),
+        }
         for alpha in self.confidence_levels:
             var = -np.quantile(returns, 1 - alpha)
             tail_returns = returns[returns < -var]
