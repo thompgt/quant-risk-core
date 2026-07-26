@@ -1,2 +1,0 @@
-[console_scripts]
-quant-risk-validate = quant_risk_core.cli:main

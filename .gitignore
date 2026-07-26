@@ -5,3 +5,17 @@ __pycache__/
 *.log
 risk_analysis_visuals.executed.ipynb
 risk_analysis_visuals.executed.html
+
+# Packaging / build artefacts
+*.egg-info/
+build/
+dist/
+.eggs/
+
+# Tooling caches
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+.venv/
+venv/
